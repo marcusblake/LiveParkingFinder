@@ -1,0 +1,18 @@
+#map{
+  height: 1000px;
+  width: 80%;
+  background-color: grey;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 25px;
+}
+
+h1{
+  text-align: center;
+  font-size: 100px;
+  text-shadow: 5px 5px 5px black;
+}
+
+body{
+  background: rgb(230, 0, 0);
+}
