@@ -1,6 +1,6 @@
 
 var request = new XMLHttpRequest();
-  request.open("GET", "../../Desktop/Hackathon/convertcsv.json", false);
+  request.open("GET", "convertcsv.json", false);
   request.send(null)
   var file = JSON.parse(request.responseText);
 
