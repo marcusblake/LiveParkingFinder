@@ -31,12 +31,14 @@ function initMap() {
   var objDate=new Date();
   var hours=objDate.getHours();
   // Try HTML5 geolocation.
+  var center;
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
       var pos = {
         lat: position.coords.latitude,
         lng: position.coords.longitude
       };
+      center=pos;
       infoWindow.setPosition(pos);
       infoWindow.setContent('Your location');
       infoWindow.open(map);
@@ -49,7 +51,7 @@ function initMap() {
     handleLocationError(false, infoWindow, map.getCenter());
   }
 
-  if(hours>=6 && hours<=18){
+  if(hours>=6 && hours<18){
     map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: 42.3601, lng: -71.0589},
       zoom: 14,
@@ -146,11 +148,15 @@ function initMap() {
 
   infoWindow = new google.maps.InfoWindow;
 
+  var directionsService=new google.maps.DirectionsService;
+  var directionsDisplay=new google.maps.DirectionsRenderer;
 
+  directionsDisplay.setMap(map);
 
   var iconBase='https://maps.google.com/mapfiles/kml/shapes/';
 
-  function features(latitude, longitude, int){
+  function features(latitude, longitude, isFull){
+    this.isFull=isFull;
     this.position=new google.maps.LatLng(latitude, longitude);
   }
 
@@ -159,7 +165,13 @@ function initMap() {
   function getLocations(){
     var arr=[];
     for(var i=0; i<lat.length;i++){
-      arr[i]=new features(lat[i], long[i], i);
+      var full=Math.floor(Math.random()*2);
+      if(full==0){
+        arr[i]=new features(lat[i], long[i], false);
+      }
+      else{
+        arr[i]=new features(lat[i], long[i], true);
+      }
     }
 
     return arr;
@@ -167,21 +179,52 @@ function initMap() {
 
   var locations=getLocations();
 
-
+console.log(locations);
   locations.forEach(function(location){
-    var marker=new google.maps.Marker({
-      position: location.position,
-      icon: 'https://maps.google.com/mapfiles/kml/shapes/parking_lot_maps.png',
-      map: map
-    });
+
+    if(location.isFull==false){
+      var marker=new google.maps.Marker({
+        position: location.position,
+        icon: 'https://maps.google.com/mapfiles/kml/shapes/parking_lot_maps.png',
+        map: map
+      });
+    }
+
+    else {
+      var marker=new google.maps.Marker({
+        position: location.position,
+        map: map
+      });
+    }
+
     google.maps.event.addListener(marker, 'click', function(){
+
+      if(location.isFull==false){
       var ans=confirm("Would you like directions to this location?");
+
       if(ans==true){
         alert('Taking you to the parking location!');
+        directionsService.route({
+          origin: {lat: center.lat, lng: center.lng},
+          destination: location.position,
+          travelMode: 'DRIVING'
+        }, function(response, status){
+          if(status==='OK'){
+            directionsDisplay.setDirections(response);
+          } else{
+            alert("Directions request failed due to " + status);
+          }
+        });
       }
+
       else{
-        alert("Okay. Routing aborted.")
+        alert("Okay. Routing aborted.");
       }
+    }
+
+    else{
+      alert("Sorry, this parking spot is occupied.");
+    }
     });
   });
 
