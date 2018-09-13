@@ -1,29 +1,24 @@
 
 var request = new XMLHttpRequest();
-  request.open("GET", "convertcsv.json", false);
-  request.send(null)
-  var file = JSON.parse(request.responseText);
+request.open("GET", "https://data.boston.gov/api/3/action/datastore_search?resource_id=284d1d7b-e3f5-4de7-be32-06b54efeee7f", false);
+request.send(null);
+
+var file = JSON.parse(request.responseText);
+var jsonData = file['result']['records']
 
 
-var long=getLong();
+var long=[];
 
-function getLong(){
-  var arr=[];
-  for(var i=0;i<500;i++){
-    arr[i]=file[i].FIELD1;
-  }
-  return arr;
-}
+jsonData.forEach(function(entry){
+  long.push(entry.X);
+});
 
-var lat=getLat();
+var lat=[];
 
-function getLat(){
-  var arr=[];
-  for(var i=0; i<500;i++){
-    arr[i]=file[i].FIELD2;
-  }
-  return arr;
-}
+jsonData.forEach(function(entry){
+  lat.push(entry.Y);
+});
+ 
 
 
 var map, infoWindow;
@@ -167,19 +162,18 @@ function initMap() {
     for(var i=0; i<lat.length;i++){
       var full=Math.floor(Math.random()*2);
       if(full==0){
-        arr[i]=new features(lat[i], long[i], false);
+        arr.push(new features(lat[i], long[i], false));
       }
       else{
-        arr[i]=new features(lat[i], long[i], true);
+        arr.push(new features(lat[i], long[i], true));
       }
     }
-
     return arr;
   }
 
   var locations=getLocations();
 
-console.log(locations);
+  console.log(locations);
   locations.forEach(function(location){
 
     if(location.isFull==false){
